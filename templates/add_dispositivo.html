@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Añadir Dispositivo</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+
+<header>Preventivos - Añadir Dispositivo</header>
+
+<div class="container mt-4 mb-5">
+  <h2>Añadir Nuevo Dispositivo</h2>
+  <form method="post" action="/add_dispositivo">
+    <div class="mb-3">
+      <label class="form-label">Nombre</label>
+      <input type="text" class="form-control" name="nombre" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">IP</label>
+      <input type="text" class="form-control" name="ip" placeholder="192.168.1.X" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tipo</label>
+      <select class="form-select" name="tipo" required>
+        {% for t in tipos %}
+          <option value="{{ t }}">{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <input type="hidden" name="tienda" value="{{ tienda_actual }}">
+    <button type="submit" class="btn btn-primary">Añadir Dispositivo</button>
+    <a href="/" class="btn btn-secondary">Volver al menú</a>
+  </form>
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Tienda</label>
+  <select class="form-select" name="tienda" required>
+    {% for t in todas_tiendas %}
+      <option value="{{ t }}">{{ t }}</option>
+    {% endfor %}
+  </select>
+</div>
+<div class="mb-3">
+  <label class="form-label">Nueva tienda (opcional)</label>
+  <input type="text" class="form-control" name="nueva_tienda" placeholder="Escribe si quieres añadir una nueva">
+</div>
+
+<footer>© 2026 Preventivos - Empresa</footer>
+
+</body>
+</html>
