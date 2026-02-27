@@ -13,6 +13,12 @@
         </header>
 
         <div class="content">
+            {% if error %}
+                <div class="error-message">
+                    <p>❌ {{ error }}</p>
+                </div>
+            {% endif %}
+
             <form method="POST" action="/add_dispositivo" class="form-dispositivo" id="form-dispositivo">
                 <div class="form-group">
                     <label for="nombre">Nombre del Dispositivo:</label>
@@ -38,7 +44,7 @@
                     <p class="tienda-label">Selecciona cómo asignar la tienda:</p>
                     
                     <div class="tienda-option">
-                        <input type="radio" id="usar-existente" name="tipo-tienda" value="existente" checked onchange="actualizarTienda()">
+                        <input type="radio" id="usar-existente" name="tipo_tienda" value="existente" checked onchange="actualizarTienda()">
                         <label for="usar-existente">Usar tienda existente</label>
                     </div>
 
@@ -52,7 +58,7 @@
                     </div>
 
                     <div class="tienda-option">
-                        <input type="radio" id="crear-nueva" name="tipo-tienda" value="nueva" onchange="actualizarTienda()">
+                        <input type="radio" id="crear-nueva" name="tipo_tienda" value="nueva" onchange="actualizarTienda()">
                         <label for="crear-nueva">Crear nueva tienda</label>
                     </div>
 
@@ -72,7 +78,7 @@
 
     <script>
         function actualizarTienda() {
-            const tipoTienda = document.querySelector('input[name="tipo-tienda"]:checked').value;
+            const tipoTienda = document.querySelector('input[name="tipo_tienda"]:checked').value;
             const tiendaExistenteGroup = document.getElementById('tienda-existente-group');
             const tiendaNuevaGroup = document.getElementById('tienda-nueva-group');
             const selectTienda = document.getElementById('tienda');
@@ -96,7 +102,7 @@
 
         // Validación adicional antes de enviar
         document.getElementById('form-dispositivo').addEventListener('submit', function(e) {
-            const tipoTienda = document.querySelector('input[name="tipo-tienda"]:checked').value;
+            const tipoTienda = document.querySelector('input[name="tipo_tienda"]:checked').value;
             const selectTienda = document.getElementById('tienda');
             const inputNuevaTienda = document.getElementById('nueva_tienda');
 
@@ -110,11 +116,6 @@
                 e.preventDefault();
                 alert('Por favor, ingresa el código de la nueva tienda');
                 return false;
-            }
-
-            // Si es nueva tienda, limpiar el campo de tienda existente
-            if (tipoTienda === 'nueva') {
-                selectTienda.value = '';
             }
         });
     </script>

@@ -31,14 +31,30 @@ TIPOS_DISPONIBLES = [
     'Pinpads/Datáfonos'
 ]
 
-# Lista de tiendas disponibles
-TIENDAS_DISPONIBLES = ['STO277', 'STO283']
+# --- FUNCIÓN PARA OBTENER TODAS LAS TIENDAS DINÁMICAMENTE ---
+def obtener_todas_las_tiendas():
+    """Obtiene todas las tiendas que existen en la base de datos"""
+    db = Session()
+    try:
+        tiendas = db.query(Dispositivo.tienda).distinct().all()
+        tiendas_list = sorted(list(set([t[0] for t in tiendas])))
+        return tiendas_list if tiendas_list else ['STO277', 'STO283']
+    finally:
+        db.close()
 
 # --- PÁGINA PRINCIPAL: MENÚ POR TIENDA ---
 @app.get("/")
 def menu(request: Request, tienda: str = Query("STO277")):
     db = Session()
     try:
+        # Obtener todas las tiendas dinámicamente
+        todas_tiendas = obtener_todas_las_tiendas()
+        
+        # Si la tienda actual no existe en la lista, añadirla
+        if tienda not in todas_tiendas:
+            todas_tiendas.append(tienda)
+            todas_tiendas.sort()
+        
         # Filtramos dispositivos según la tienda seleccionada
         dispositivos_tienda = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
         
@@ -50,7 +66,7 @@ def menu(request: Request, tienda: str = Query("STO277")):
         return templates.TemplateResponse("menu.html", {
             "request": request,
             "tienda_actual": tienda,
-            "todas_tiendas": TIENDAS_DISPONIBLES,
+            "todas_tiendas": todas_tiendas,
             "tipos": TIPOS_DISPONIBLES,
             "conteo_por_tipo": conteo_por_tipo
         })
@@ -116,10 +132,11 @@ def ping_tipo(
 # --- FORMULARIO PARA AÑADIR DISPOSITIVO ---
 @app.get("/add_dispositivo")
 def add_dispositivo_form(request: Request):
+    todas_tiendas = obtener_todas_las_tiendas()
     return templates.TemplateResponse("add_dispositivo.html", {
         "request": request,
         "tipos": TIPOS_DISPONIBLES,
-        "todas_tiendas": TIENDAS_DISPONIBLES
+        "todas_tiendas": todas_tiendas
     })
 
 # --- RUTA POST PARA GUARDAR DISPOSITIVO ---
@@ -128,25 +145,49 @@ def add_dispositivo_post(
     nombre: str = Form(...),
     ip: str = Form(...),
     tipo: str = Form(...),
-    tienda: str = Form(...),
-    nueva_tienda: str = Form(None)
+    tipo_tienda: str = Form(...),
+    tienda: str = Form(default=""),
+    nueva_tienda: str = Form(default="")
 ):
     db = Session()
     try:
-        # Si el usuario indica una nueva tienda, la usamos
-        if nueva_tienda and nueva_tienda.strip():
-            tienda = nueva_tienda.strip()
+        # Determinar cuál tienda usar
+        tienda_final = ""
+        
+        if tipo_tienda == "existente" and tienda:
+            tienda_final = tienda
+        elif tipo_tienda == "nueva" and nueva_tienda:
+            tienda_final = nueva_tienda.strip().upper()
+        
+        # Validación
+        if not tienda_final:
+            todas_tiendas = obtener_todas_las_tiendas()
+            return templates.TemplateResponse("add_dispositivo.html", {
+                "request": request,
+                "tipos": TIPOS_DISPONIBLES,
+                "todas_tiendas": todas_tiendas,
+                "error": "Por favor, selecciona o crea una tienda válida"
+            }, status_code=400)
         
         nuevo_dispositivo = Dispositivo(
             nombre=nombre, 
             ip=ip, 
             tipo=tipo, 
-            tienda=tienda
+            tienda=tienda_final
         )
         db.add(nuevo_dispositivo)
         db.commit()
         
-        return RedirectResponse("/?tienda=" + tienda, status_code=303)
+        return RedirectResponse("/?tienda=" + tienda_final, status_code=303)
+    except Exception as e:
+        print(f"Error al añadir dispositivo: {e}")
+        todas_tiendas = obtener_todas_las_tiendas()
+        return templates.TemplateResponse("add_dispositivo.html", {
+            "request": request,
+            "tipos": TIPOS_DISPONIBLES,
+            "todas_tiendas": todas_tiendas,
+            "error": f"Error al guardar: {str(e)}"
+        }, status_code=400)
     finally:
         db.close()
 
