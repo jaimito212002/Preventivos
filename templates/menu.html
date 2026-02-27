@@ -1,44 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Preventivos</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preventivos - Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>🔍 Sistema de Preventivos</h1>
+            <p>Monitoreo de dispositivos de IT</p>
+        </header>
 
-<header>Preventivos - Monitor de Dispositivos</header>
+        <nav class="tienda-selector">
+            <label for="tienda">Selecciona Tienda:</label>
+            <select id="tienda" onchange="cambiarTienda()">
+                {% for t in todas_tiendas %}
+                    <option value="{{ t }}" {% if t == tienda_actual %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        </nav>
 
+        <div class="content">
+            {% if tipos %}
+                <div class="tipos-grid">
+                    {% for tipo in tipos %}
+                        <div class="tipo-card">
+                            <h2>{{ tipo }}</h2>
+                            <form method="POST" action="/ping_tipo" class="ping-form">
+                                <input type="hidden" name="tipo" value="{{ tipo }}">
+                                <input type="hidden" name="tienda" value="{{ tienda_actual }}">
+                                <button type="submit" class="btn-ping">🔔 PING</button>
+                            </form>
+                            <div class="device-count">
+                                <p>{{ dispositivos|length if dispositivos else 0 }} dispositivos</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>No hay dispositivos registrados en esta tienda</p>
+                </div>
+            {% endif %}
 
-<div class="container mt-4 mb-5">
-  <div class="row g-4">
-
-    {% set tipos = ['APs','Switches','Servidores','Servidores Suecia','Impresoras','Cajas','Pinpads/Datáfonos'] %}
-    {% for t in tipos %}
-      <div class="col-md-4 col-sm-6">
-        <div class="card text-center p-4 shadow">
-          <h4>{{ t }}</h4>
-          <form method="post" action="/ping_tipo">
-            <input type="hidden" name="tipo" value="{{ t }}">
-            <button type="submit" class="btn btn-ping mt-3">Ping</button>
-          </form>
+            <div class="admin-section">
+                <a href="/add_dispositivo" class="btn-add">➕ Agregar Dispositivo</a>
+            </div>
         </div>
-      </div>
-    {% endfor %}
+    </div>
 
-  </div>
-</div>
-
-
-
-<div class="row mt-4">
-  <div class="col-12 text-center">
-    <a href="/add_dispositivo" class="btn btn-warning btn-lg">Añadir Nuevo Dispositivo</a>
-  </div>
-</div>
-
-<footer>© 2026 Preventivos - Empresa</footer>
-
+    <script>
+        function cambiarTienda() {
+            const tienda = document.getElementById('tienda').value;
+            window.location.href = '/?tienda=' + tienda;
+        }
+    </script>
 </body>
 </html>

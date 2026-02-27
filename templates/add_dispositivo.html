@@ -1,54 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Añadir Dispositivo</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Dispositivo - Preventivos</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>➕ Agregar Nuevo Dispositivo</h1>
+        </header>
 
-<header>Preventivos - Añadir Dispositivo</header>
+        <div class="content">
+            <form method="POST" action="/add_dispositivo" class="form-dispositivo">
+                <div class="form-group">
+                    <label for="nombre">Nombre del Dispositivo:</label>
+                    <input type="text" id="nombre" name="nombre" required placeholder="Ej: AP-Entrada-01">
+                </div>
 
-<div class="container mt-4 mb-5">
-  <h2>Añadir Nuevo Dispositivo</h2>
-  <form method="post" action="/add_dispositivo">
-    <div class="mb-3">
-      <label class="form-label">Nombre</label>
-      <input type="text" class="form-control" name="nombre" required>
+                <div class="form-group">
+                    <label for="ip">Dirección IP:</label>
+                    <input type="text" id="ip" name="ip" required placeholder="Ej: 192.168.1.100">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo de Dispositivo:</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Selecciona un tipo</option>
+                        {% for t in tipos %}
+                            <option value="{{ t }}">{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tienda">Tienda:</label>
+                    <select id="tienda" name="tienda" required>
+                        <option value="">Selecciona una tienda</option>
+                        {% for t in todas_tiendas %}
+                            <option value="{{ t }}">{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="nueva_tienda">O crea una nueva tienda:</label>
+                    <input type="text" id="nueva_tienda" name="nueva_tienda" placeholder="(Opcional) Ej: STO999">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">✅ Guardar Dispositivo</button>
+                    <a href="/" class="btn-cancel">❌ Cancelar</a>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="mb-3">
-      <label class="form-label">IP</label>
-      <input type="text" class="form-control" name="ip" placeholder="192.168.1.X" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Tipo</label>
-      <select class="form-select" name="tipo" required>
-        {% for t in tipos %}
-          <option value="{{ t }}">{{ t }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <input type="hidden" name="tienda" value="{{ tienda_actual }}">
-    <button type="submit" class="btn btn-primary">Añadir Dispositivo</button>
-    <a href="/" class="btn btn-secondary">Volver al menú</a>
-  </form>
-</div>
-
-<div class="mb-3">
-  <label class="form-label">Tienda</label>
-  <select class="form-select" name="tienda" required>
-    {% for t in todas_tiendas %}
-      <option value="{{ t }}">{{ t }}</option>
-    {% endfor %}
-  </select>
-</div>
-<div class="mb-3">
-  <label class="form-label">Nueva tienda (opcional)</label>
-  <input type="text" class="form-control" name="nueva_tienda" placeholder="Escribe si quieres añadir una nueva">
-</div>
-
-<footer>© 2026 Preventivos - Empresa</footer>
-
 </body>
 </html>

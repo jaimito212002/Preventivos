@@ -6,20 +6,14 @@ from db import Session, Dispositivo, Historial
 from ping3 import ping
 import datetime
 import time
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-
-class Dispositivo(Base):
-    __tablename__ = "dispositivos"
-    id = Column(Integer, primary_key=True)
-    nombre = Column(String, nullable=False)
-    ip = Column(String, nullable=False)
-    tipo = Column(String, nullable=False)
-    tienda = Column(String, nullable=False)  # ← esta línea es nueva
+import os
 
 app = FastAPI()
+
+# Crear directorios si no existen
+os.makedirs("templates", exist_ok=True)
+os.makedirs("static", exist_ok=True)
+
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -30,22 +24,25 @@ ultimo_ping_resultado = {}
 @app.get("/")
 def menu(request: Request, tienda: str = Query("STO277")):
     db = Session()
-    # Filtramos dispositivos según la tienda seleccionada
-    dispositivos = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
-    db.close()
-    
-    # Sacamos los tipos disponibles en esa tienda
-    tipos = list(set([d.tipo for d in dispositivos]))
-    
-    # Lista de tiendas disponibles (puede ser dinámica luego)
-    todas_tiendas = ['STO277', 'STO283']
-    
-    return templates.TemplateResponse("menu.html", {
-        "request": request,
-        "tienda_actual": tienda,
-        "todas_tiendas": todas_tiendas,
-        "tipos": tipos
-    })
+    try:
+        # Filtramos dispositivos según la tienda seleccionada
+        dispositivos = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
+        
+        # Sacamos los tipos disponibles en esa tienda
+        tipos = list(set([d.tipo for d in dispositivos])) if dispositivos else []
+        
+        # Lista de tiendas disponibles (puede ser dinámica luego)
+        todas_tiendas = ['STO277', 'STO283']
+        
+        return templates.TemplateResponse("menu.html", {
+            "request": request,
+            "tienda_actual": tienda,
+            "todas_tiendas": todas_tiendas,
+            "tipos": tipos,
+            "dispositivos": dispositivos
+        })
+    finally:
+        db.close()
 
 # --- RUTA PARA HACER PING POR TIPO Y TIENDA ---
 @app.post("/ping_tipo")
@@ -54,36 +51,59 @@ def ping_tipo(
     tienda: str = Form(...)
 ):
     db = Session()
-    dispositivos = db.query(Dispositivo).filter(
-        Dispositivo.tipo == tipo,
-        Dispositivo.tienda == tienda
-    ).all()
-    resultados = []
+    try:
+        dispositivos = db.query(Dispositivo).filter(
+            Dispositivo.tipo == tipo,
+            Dispositivo.tienda == tienda
+        ).all()
+        resultados = []
 
-    for d in dispositivos:
-        intentos = 0
-        exito = False
-        while intentos < 3 and not exito:
-            intentos += 1
-            r = ping(d.ip, timeout=1)
-            if r:
-                exito = True
-            time.sleep(0.2)
-        estado = "Online" if exito else "Offline"
-        resultados.append({"nombre": d.nombre, "estado": estado, "intentos": intentos})
-        db.add(Historial(dispositivo=d.nombre, estado=estado, fecha=datetime.datetime.now()))
+        for d in dispositivos:
+            intentos = 0
+            exito = False
+            while intentos < 3 and not exito:
+                intentos += 1
+                try:
+                    r = ping(d.ip, timeout=2)
+                    if r and r is not False:
+                        exito = True
+                except Exception as e:
+                    print(f"Error pinging {d.ip}: {e}")
+                time.sleep(0.1)
+            
+            estado = "🟢 Online" if exito else "🔴 Offline"
+            resultados.append({
+                "nombre": d.nombre, 
+                "ip": d.ip,
+                "estado": estado, 
+                "intentos": intentos
+            })
+            
+            # Guardar en historial
+            historial = Historial(
+                dispositivo=d.nombre, 
+                estado=estado, 
+                fecha=datetime.datetime.now()
+            )
+            db.add(historial)
+        
         db.commit()
-    db.close()
 
-    global ultimo_ping_resultado
-    ultimo_ping_resultado = {"tipo": tipo, "tienda": tienda, "resultados": resultados}
+        global ultimo_ping_resultado
+        ultimo_ping_resultado = {
+            "tipo": tipo, 
+            "tienda": tienda, 
+            "resultados": resultados
+        }
 
-    return RedirectResponse("/resultado", status_code=303)
+        return RedirectResponse("/resultado", status_code=303)
+    finally:
+        db.close()
 
 # --- FORMULARIO PARA AÑADIR DISPOSITIVO ---
 @app.get("/add_dispositivo")
 def add_dispositivo_form(request: Request):
-    tipos = ['APs','Switches','Servidores','Servidores Suecia','Impresoras','Cajas','Pinpads/Datáfonos']
+    tipos = ['APs', 'Switches', 'Servidores', 'Servidores Suecia', 'Impresoras', 'Cajas', 'Pinpads/Datáfonos']
     todas_tiendas = ['STO277', 'STO283']
     return templates.TemplateResponse("add_dispositivo.html", {
         "request": request,
@@ -101,13 +121,23 @@ def add_dispositivo_post(
     nueva_tienda: str = Form(None)
 ):
     db = Session()
-    # Si el usuario indica una nueva tienda, la usamos
-    if nueva_tienda:
-        tienda = nueva_tienda
-    db.add(Dispositivo(nombre=nombre, ip=ip, tipo=tipo, tienda=tienda))
-    db.commit()
-    db.close()
-    return RedirectResponse("/", status_code=303)
+    try:
+        # Si el usuario indica una nueva tienda, la usamos
+        if nueva_tienda and nueva_tienda.strip():
+            tienda = nueva_tienda.strip()
+        
+        nuevo_dispositivo = Dispositivo(
+            nombre=nombre, 
+            ip=ip, 
+            tipo=tipo, 
+            tienda=tienda
+        )
+        db.add(nuevo_dispositivo)
+        db.commit()
+        
+        return RedirectResponse("/?tienda=" + tienda, status_code=303)
+    finally:
+        db.close()
 
 # --- PÁGINA DE RESULTADOS DEL ÚLTIMO PING ---
 @app.get("/resultado")
@@ -119,3 +149,7 @@ def resultado(request: Request):
         "tienda": ultimo_ping_resultado.get("tienda", ""),
         "resultados": ultimo_ping_resultado.get("resultados", [])
     })
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

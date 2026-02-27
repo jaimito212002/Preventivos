@@ -1,49 +1,29 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
 
-print("Creando base de datos...")
-
-engine = create_engine("sqlite:///database.db")
+# Configurar la base de datos SQLite
+DATABASE_URL = "sqlite:///./database.db"
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
-class Tienda(Base):
-    __tablename__ = "tiendas"
-
-    id = Column(Integer, primary_key=True)
-    nombre = Column(String, unique=True, nullable=False)
-
-    dispositivos = relationship("Dispositivo", back_populates="tienda_rel")
-
-Session = sessionmaker(bind=engine)
-
 
 class Dispositivo(Base):
     __tablename__ = "dispositivos"
-
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
-    ip = Column(String, nullable=False)
+    ip = Column(String, nullable=False, unique=True)
     tipo = Column(String, nullable=False)
     tienda = Column(String, nullable=False)
 
-
-
 class Historial(Base):
-
     __tablename__ = "historial"
-
-    id = Column(Integer, primary_key=True)
-
-    dispositivo = Column(String)
-
-    estado = Column(String)
-
+    id = Column(Integer, primary_key=True, index=True)
+    dispositivo = Column(String, nullable=False)
+    estado = Column(String, nullable=False)
     fecha = Column(DateTime, default=datetime.datetime.now)
 
-
-Base.metadata.create_all(engine)
-
-print("Base de datos creada correctamente")
+# Crear las tablas
+Base.metadata.create_all(bind=engine)
