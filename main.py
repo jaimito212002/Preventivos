@@ -38,22 +38,31 @@ def obtener_todas_las_tiendas():
     try:
         tiendas = db.query(Dispositivo.tienda).distinct().all()
         tiendas_list = sorted(list(set([t[0] for t in tiendas])))
-        return tiendas_list if tiendas_list else ['STO277', 'STO283']
+        return tiendas_list
     finally:
         db.close()
 
 # --- PÁGINA PRINCIPAL: MENÚ POR TIENDA ---
 @app.get("/")
-def menu(request: Request, tienda: str = Query("STO277")):
+def menu(request: Request, tienda: str = Query(None)):
     db = Session()
     try:
         # Obtener todas las tiendas dinámicamente
         todas_tiendas = obtener_todas_las_tiendas()
         
-        # Si la tienda actual no existe en la lista, añadirla
+        # Si no hay tiendas, mostrar página vacía
+        if not todas_tiendas:
+            return templates.TemplateResponse("menu_vacio.html", {
+                "request": request
+            })
+        
+        # Si no se especifica tienda, usar la primera
+        if not tienda:
+            tienda = todas_tiendas[0]
+        
+        # Si la tienda actual no existe en la lista, redirigir a la primera
         if tienda not in todas_tiendas:
-            todas_tiendas.append(tienda)
-            todas_tiendas.sort()
+            tienda = todas_tiendas[0]
         
         # Filtramos dispositivos según la tienda seleccionada
         dispositivos_tienda = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
@@ -129,6 +138,83 @@ def ping_tipo(
     finally:
         db.close()
 
+# --- PÁGINA DE GESTIÓN DE DISPOSITIVOS ---
+@app.get("/dispositivos")
+def dispositivos(request: Request, tienda: str = Query(None)):
+    db = Session()
+    try:
+        # Obtener todas las tiendas dinámicamente
+        todas_tiendas = obtener_todas_las_tiendas()
+        
+        # Si no hay tiendas, mostrar página vacía
+        if not todas_tiendas:
+            return templates.TemplateResponse("dispositivos_vacio.html", {
+                "request": request
+            })
+        
+        # Si no se especifica tienda, usar la primera
+        if not tienda:
+            tienda = todas_tiendas[0]
+        
+        # Si la tienda actual no existe en la lista, usar la primera
+        if tienda not in todas_tiendas:
+            tienda = todas_tiendas[0]
+        
+        # Filtramos dispositivos según la tienda seleccionada
+        dispositivos_tienda = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
+        
+        # Crear un diccionario con el conteo de dispositivos por tipo
+        conteo_por_tipo = {}
+        for tipo in TIPOS_DISPONIBLES:
+            conteo_por_tipo[tipo] = len([d for d in dispositivos_tienda if d.tipo == tipo])
+        
+        return templates.TemplateResponse("dispositivos.html", {
+            "request": request,
+            "tienda_actual": tienda,
+            "todas_tiendas": todas_tiendas,
+            "tipos": TIPOS_DISPONIBLES,
+            "conteo_por_tipo": conteo_por_tipo
+        })
+    finally:
+        db.close()
+
+# --- PÁGINA DE DETALLES DE DISPOSITIVOS POR TIPO ---
+@app.get("/dispositivos/tipo")
+def dispositivos_por_tipo(request: Request, tipo: str = Query(...), tienda: str = Query(None)):
+    db = Session()
+    try:
+        todas_tiendas = obtener_todas_las_tiendas()
+        
+        # Si no hay tiendas
+        if not todas_tiendas:
+            return templates.TemplateResponse("dispositivos_vacio.html", {
+                "request": request
+            })
+        
+        # Si no se especifica tienda, usar la primera
+        if not tienda:
+            tienda = todas_tiendas[0]
+        
+        # Si la tienda actual no existe, usar la primera
+        if tienda not in todas_tiendas:
+            tienda = todas_tiendas[0]
+        
+        # Obtener dispositivos de ese tipo y tienda
+        dispositivos = db.query(Dispositivo).filter(
+            Dispositivo.tipo == tipo,
+            Dispositivo.tienda == tienda
+        ).all()
+        
+        return templates.TemplateResponse("dispositivos_tipo.html", {
+            "request": request,
+            "tienda_actual": tienda,
+            "todas_tiendas": todas_tiendas,
+            "tipo": tipo,
+            "dispositivos": dispositivos
+        })
+    finally:
+        db.close()
+
 # --- FORMULARIO PARA AÑADIR DISPOSITIVO ---
 @app.get("/add_dispositivo")
 def add_dispositivo_form(request: Request):
@@ -188,6 +274,81 @@ def add_dispositivo_post(
             "todas_tiendas": todas_tiendas,
             "error": f"Error al guardar: {str(e)}"
         }, status_code=400)
+    finally:
+        db.close()
+
+# --- RUTA PARA ACTUALIZAR DISPOSITIVO ---
+@app.post("/actualizar_dispositivo/{dispositivo_id}")
+def actualizar_dispositivo(
+    dispositivo_id: int,
+    nombre: str = Form(...),
+    ip: str = Form(...),
+    tipo: str = Form(...),
+    tienda: str = Form(...)
+):
+    db = Session()
+    try:
+        dispositivo = db.query(Dispositivo).filter(Dispositivo.id == dispositivo_id).first()
+        
+        if dispositivo:
+            dispositivo.nombre = nombre
+            dispositivo.ip = ip
+            dispositivo.tipo = tipo
+            db.commit()
+            print(f"✅ Dispositivo {dispositivo_id} actualizado correctamente")
+        
+        return RedirectResponse(f"/dispositivos/tipo?tipo={tipo}&tienda={tienda}&actualizado={dispositivo_id}", status_code=303)
+    except Exception as e:
+        print(f"Error al actualizar dispositivo: {e}")
+        return RedirectResponse(f"/dispositivos?tienda={tienda}", status_code=303)
+    finally:
+        db.close()
+
+# --- RUTA PARA ELIMINAR DISPOSITIVO ---
+@app.post("/eliminar_dispositivo/{dispositivo_id}")
+def eliminar_dispositivo(dispositivo_id: int, tipo: str = Form(...), tienda: str = Form(...)):
+    db = Session()
+    try:
+        dispositivo = db.query(Dispositivo).filter(Dispositivo.id == dispositivo_id).first()
+        
+        if dispositivo:
+            nombre_dispositivo = dispositivo.nombre
+            db.delete(dispositivo)
+            db.commit()
+            print(f"✅ Dispositivo {nombre_dispositivo} ({dispositivo_id}) eliminado correctamente")
+        
+        return RedirectResponse(f"/dispositivos/tipo?tipo={tipo}&tienda={tienda}&eliminado={dispositivo_id}", status_code=303)
+    except Exception as e:
+        print(f"Error al eliminar dispositivo: {e}")
+        return RedirectResponse(f"/dispositivos/tipo?tipo={tipo}&tienda={tienda}", status_code=303)
+    finally:
+        db.close()
+
+# --- RUTA PARA ELIMINAR TIENDA COMPLETA ---
+@app.post("/eliminar_tienda")
+def eliminar_tienda(tienda: str = Form(...)):
+    db = Session()
+    try:
+        # Eliminar todos los dispositivos de esa tienda
+        dispositivos = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
+        for dispositivo in dispositivos:
+            db.delete(dispositivo)
+        
+        db.commit()
+        print(f"✅ Tienda {tienda} y todos sus dispositivos eliminados")
+        
+        # Redirigir a la primera tienda disponible
+        todas_tiendas = obtener_todas_las_tiendas()
+        
+        if todas_tiendas:
+            tienda_redireccion = todas_tiendas[0]
+            return RedirectResponse(f"/?tienda={tienda_redireccion}", status_code=303)
+        else:
+            # Si no hay más tiendas, redirigir a la página vacía
+            return RedirectResponse("/", status_code=303)
+    except Exception as e:
+        print(f"Error al eliminar tienda: {e}")
+        return RedirectResponse(f"/?tienda={tienda}", status_code=303)
     finally:
         db.close()
 

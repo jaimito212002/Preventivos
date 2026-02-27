@@ -431,3 +431,489 @@ header p {
     border-radius: 20px;
     margin-left: 10px;
 }
+
+/* ===== TABLA DE DISPOSITIVOS ===== */
+
+.dispositivos-section {
+    margin-top: 40px;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border-left: 5px solid #667eea;
+}
+
+.dispositivos-section h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.dispositivos-tabla {
+    overflow-x: auto;
+}
+
+.tabla-dispositivos {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tabla-dispositivos thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tabla-dispositivos th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.tabla-dispositivos td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.tabla-dispositivos tbody tr:hover {
+    background: #f0f0f0;
+}
+
+.btn-eliminar {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-eliminar:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.form-inline {
+    display: inline;
+}
+
+/* ===== MEJORAS TIENDA-INFO ===== */
+
+.tienda-info-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.tienda-info-content p {
+    margin: 0;
+}
+
+.btn-eliminar-tienda {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-eliminar-tienda:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .tienda-info-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tabla-dispositivos {
+        font-size: 0.9em;
+    }
+
+    .tabla-dispositivos th,
+    .tabla-dispositivos td {
+        padding: 8px 10px;
+    }
+}
+/* ===== BOTÓN DISPOSITIVOS ===== */
+
+.btn-devices {
+    display: inline-block;
+    background: #17a2b8;
+    color: white;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+    margin-right: 10px;
+}
+
+.btn-devices:hover {
+    background: #138496;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+}
+
+/* ===== LISTA DE DISPOSITIVOS ===== */
+
+.dispositivos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dispositivo-item {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dispositivo-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.dispositivo-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.dispositivo-campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.dispositivo-campo label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 0.95em;
+}
+
+.dispositivo-campo input {
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+}
+
+.dispositivo-campo input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.dispositivo-campo input.readonly {
+    background: #f5f5f5;
+    cursor: not-allowed;
+    color: #666;
+}
+
+.dispositivo-acciones {
+    display: flex;
+    gap: 10px;
+    grid-column: 1 / -1;
+}
+
+.btn-guardar {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-guardar:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+.form-eliminar {
+    display: contents;
+}
+
+.btn-eliminar-dispositivo {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-eliminar-dispositivo:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+.btn-ver-dispositivos {
+    display: inline-block;
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin: 10px 0;
+}
+
+.btn-ver-dispositivos:hover {
+    background: #138496;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .dispositivo-form {
+        grid-template-columns: 1fr;
+    }
+
+    .dispositivo-acciones {
+        flex-direction: column;
+    }
+
+    .admin-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-devices,
+    .btn-add,
+    .btn-back {
+        width: 100%;
+        text-align: center;
+        margin-right: 0;
+    }
+}
+/* ===== ESTADOS DE DISPOSITIVO ===== */
+
+.estado-guardado {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9em;
+    min-width: 80px;
+    text-align: center;
+}
+
+.estado-exito {
+    color: #28a745;
+    background: #d4edda;
+    animation: fadeInOut 2s ease-in-out;
+}
+
+.estado-error {
+    color: #dc3545;
+    background: #f8d7da;
+}
+
+.estado-eliminado {
+    color: #ff6b6b;
+    background: #ffe0e0;
+    animation: fadeInOut 1.5s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+/* ===== ANIMACIÓN ELIMINACIÓN ===== */
+
+.dispositivo-item.eliminado {
+    animation: slideOut 1s ease-in-out forwards;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+@keyframes slideOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+/* ===== ESTADOS DE DISPOSITIVO ===== */
+
+.dispositivo-campo-tipo {
+    display: flex;
+    flex-direction: column;
+}
+
+.dispositivo-campo-tipo label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 0.95em;
+}
+
+.tipo-con-estado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tipo-con-estado input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95em;
+    background: #f5f5f5;
+    cursor: not-allowed;
+    color: #666;
+}
+
+.estado-guardado {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9em;
+    white-space: nowrap;
+    min-width: auto;
+    text-align: center;
+    height: fit-content;
+}
+
+.estado-exito {
+    color: #28a745;
+    background: #d4edda;
+    border: 1px solid #28a745;
+    animation: slideIn 0.3s ease-out;
+}
+
+.estado-error {
+    color: #dc3545;
+    background: #f8d7da;
+    border: 1px solid #dc3545;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== ANIMACIÓN ELIMINACIÓN ===== */
+
+.dispositivo-item.eliminado {
+    animation: slideOutFast 0.5s ease-in-out forwards;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+@keyframes slideOutFast {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+/* ===== TIENDA PROTEGIDA ===== */
+
+.tienda-protegida {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+/* ===== ESTADO VACÍO GRANDE ===== */
+
+.empty-state-large {
+    text-align: center;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 2px dashed #dee2e6;
+}
+
+.empty-state-large h2 {
+    color: #495057;
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+.empty-state-large p {
+    color: #6c757d;
+    font-size: 1.1em;
+    margin-bottom: 30px;
+}
+
+.empty-state-large .btn-add {
+    display: inline-block;
+    background: #28a745;
+    color: white;
+    padding: 15px 40px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.05em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.empty-state-large .btn-add:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
