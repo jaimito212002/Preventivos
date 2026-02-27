@@ -42,6 +42,31 @@ def obtener_todas_las_tiendas():
     finally:
         db.close()
 
+# --- FUNCIÓN PARA HACER PING CON IP Y HOSTNAME ---
+def hacer_ping(ip: str, hostname: str = None, timeout: int = 2) -> bool:
+    """
+    Intenta hacer ping a la IP. Si falla y hay hostname, intenta con el hostname.
+    Retorna True si alguno responde, False si ambos fallan.
+    """
+    try:
+        # Intentar con IP
+        resultado = ping(ip, timeout=timeout)
+        if resultado and resultado is not False:
+            return True
+    except Exception as e:
+        print(f"Error pinging IP {ip}: {e}")
+    
+    # Si la IP falla y hay hostname, intentar con hostname
+    if hostname:
+        try:
+            resultado = ping(hostname, timeout=timeout)
+            if resultado and resultado is not False:
+                return True
+        except Exception as e:
+            print(f"Error pinging hostname {hostname}: {e}")
+    
+    return False
+
 # --- PÁGINA PRINCIPAL: MENÚ POR TIENDA ---
 @app.get("/")
 def menu(request: Request, tienda: str = Query(None)):
@@ -97,24 +122,15 @@ def ping_tipo(
         resultados = []
 
         for d in dispositivos:
-            intentos = 0
-            exito = False
-            while intentos < 3 and not exito:
-                intentos += 1
-                try:
-                    r = ping(d.ip, timeout=2)
-                    if r and r is not False:
-                        exito = True
-                except Exception as e:
-                    print(f"Error pinging {d.ip}: {e}")
-                time.sleep(0.1)
+            # Hacer ping con IP y hostname
+            exito = hacer_ping(d.ip, d.hostname, timeout=2)
             
             estado = "🟢 Online" if exito else "🔴 Offline"
             resultados.append({
                 "nombre": d.nombre, 
                 "ip": d.ip,
-                "estado": estado, 
-                "intentos": intentos
+                "hostname": d.hostname if d.hostname else "N/A",
+                "estado": estado
             })
             
             # Guardar en historial
@@ -230,6 +246,7 @@ def add_dispositivo_form(request: Request):
 def add_dispositivo_post(
     nombre: str = Form(...),
     ip: str = Form(...),
+    hostname: str = Form(default=""),
     tipo: str = Form(...),
     tipo_tienda: str = Form(...),
     tienda: str = Form(default=""),
@@ -255,9 +272,13 @@ def add_dispositivo_post(
                 "error": "Por favor, selecciona o crea una tienda válida"
             }, status_code=400)
         
+        # Si hostname está vacío, dejarlo como None
+        hostname_final = hostname.strip() if hostname else None
+        
         nuevo_dispositivo = Dispositivo(
             nombre=nombre, 
-            ip=ip, 
+            ip=ip,
+            hostname=hostname_final,
             tipo=tipo, 
             tienda=tienda_final
         )
@@ -283,6 +304,7 @@ def actualizar_dispositivo(
     dispositivo_id: int,
     nombre: str = Form(...),
     ip: str = Form(...),
+    hostname: str = Form(default=""),
     tipo: str = Form(...),
     tienda: str = Form(...)
 ):
@@ -293,6 +315,7 @@ def actualizar_dispositivo(
         if dispositivo:
             dispositivo.nombre = nombre
             dispositivo.ip = ip
+            dispositivo.hostname = hostname.strip() if hostname else None
             dispositivo.tipo = tipo
             db.commit()
             print(f"✅ Dispositivo {dispositivo_id} actualizado correctamente")

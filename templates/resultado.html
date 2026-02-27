@@ -20,8 +20,8 @@
                         <tr>
                             <th>Dispositivo</th>
                             <th>IP</th>
+                            <th>Hostname</th>
                             <th>Estado</th>
-                            <th>Intentos</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,8 +29,8 @@
                             <tr class="{% if 'Online' in resultado.estado %}online{% else %}offline{% endif %}">
                                 <td>{{ resultado.nombre }}</td>
                                 <td>{{ resultado.ip }}</td>
+                                <td>{{ resultado.hostname }}</td>
                                 <td>{{ resultado.estado }}</td>
-                                <td>{{ resultado.intentos }}/3</td>
                             </tr>
                         {% endfor %}
                     </tbody>

@@ -31,6 +31,12 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="hostname">Hostname: <span class="opcional">(Opcional)</span></label>
+                    <input type="text" id="hostname" name="hostname" placeholder="Ej: retes277-nb001">
+                    <p class="hint">💡 Se usará para hacer ping si la IP falla</p>
+                </div>
+
+                <div class="form-group">
                     <label for="tipo">Tipo de Dispositivo:</label>
                     <select id="tipo" name="tipo" required>
                         <option value="">Selecciona un tipo</option>
@@ -63,7 +69,7 @@
                     </div>
 
                     <div id="tienda-nueva-group" class="tienda-subgroup" style="display: none;">
-                        <input type="text" id="nueva_tienda" name="nueva_tienda" placeholder="Ej: STO304" maxlength="20">
+                        <input type="text" id="nueva_tienda" name="nueva_tienda" placeholder="Ej: STO304">
                         <p class="hint">💡 Código de la tienda (máx. 20 caracteres)</p>
                     </div>
                 </div>

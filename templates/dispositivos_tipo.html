@@ -38,6 +38,11 @@
                                     <input type="text" name="ip" value="{{ dispositivo.ip }}" required>
                                 </div>
 
+                                <div class="dispositivo-campo">
+                                    <label>Hostname:</label>
+                                    <input type="text" name="hostname" value="{{ dispositivo.hostname if dispositivo.hostname else '' }}" placeholder="(Opcional)">
+                                </div>
+
                                 <div class="dispositivo-campo-tipo">
                                     <label>Tipo:</label>
                                     <div class="tipo-con-estado">

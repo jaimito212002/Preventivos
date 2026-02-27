@@ -33,9 +33,15 @@
         </div>
 
         <div class="content">
-            <div class="tipos-grid">
+            <!-- BARRA DE BÚSQUEDA -->
+            <div class="barra-busqueda">
+                <input type="text" id="busqueda" placeholder="🔍 Buscar tipo de dispositivo..." onkeyup="filtrarTipos()">
+                <button class="btn-limpiar" onclick="limpiarBusqueda()">✕ Limpiar</button>
+            </div>
+
+            <div class="tipos-grid" id="tipos-grid">
                 {% for tipo in tipos %}
-                    <div class="tipo-card">
+                    <div class="tipo-card" data-tipo="{{ tipo }}">
                         <h2>{{ tipo }}</h2>
                         <form method="POST" action="/ping_tipo" class="ping-form">
                             <input type="hidden" name="tipo" value="{{ tipo }}">
@@ -65,6 +71,18 @@
         </div>
     </div>
 
+    <footer>
+        <div class="footer-content">
+            <p>
+                © 2026 Sistema de Preventivos
+                <span class="footer-divider">|</span>
+                Desarrollado por <a href="#">Jaime Pulido</a>
+                <span class="footer-divider">|</span>
+                Todos los derechos reservados
+            </p>
+        </div>
+    </footer>
+
     <script>
         function cambiarTienda() {
             const tienda = document.getElementById('tienda').value;
@@ -73,6 +91,28 @@
 
         function confirmarEliminarTienda(tienda) {
             return confirm(`⚠️ ¿Estás SEGURO de que quieres eliminar TODA la tienda "${tienda}" y todos sus dispositivos?\n\n⛔ Esta acción NO se puede deshacer.`);
+        }
+
+        // Función para filtrar tipos
+        function filtrarTipos() {
+            const busqueda = document.getElementById('busqueda').value.toLowerCase();
+            const tarjetas = document.querySelectorAll('.tipo-card');
+
+            tarjetas.forEach(tarjeta => {
+                const tipo = tarjeta.getAttribute('data-tipo').toLowerCase();
+                if (tipo.includes(busqueda)) {
+                    tarjeta.style.display = '';
+                } else {
+                    tarjeta.style.display = 'none';
+                }
+            });
+        }
+
+        // Función para limpiar búsqueda
+        function limpiarBusqueda() {
+            document.getElementById('busqueda').value = '';
+            filtrarTipos();
+            document.getElementById('busqueda').focus();
         }
     </script>
 </body>

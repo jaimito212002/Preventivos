@@ -14,7 +14,8 @@ class Dispositivo(Base):
     __tablename__ = "dispositivos"
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
-    ip = Column(String, nullable=False, unique=True)
+    ip = Column(String, nullable=False)
+    hostname = Column(String, nullable=True)  # ← NUEVO CAMPO
     tipo = Column(String, nullable=False)
     tienda = Column(String, nullable=False)
 
