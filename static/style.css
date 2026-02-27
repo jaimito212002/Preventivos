@@ -136,6 +136,11 @@ header p {
     font-size: 0.9em;
 }
 
+.sin-dispositivos {
+    color: #999;
+    font-style: italic;
+}
+
 .admin-section {
     margin-top: 40px;
     padding-top: 20px;
@@ -167,7 +172,6 @@ header p {
     color: #999;
 }
 
-/* Tabla de resultados */
 .resultado-table {
     width: 100%;
     border-collapse: collapse;
@@ -207,7 +211,6 @@ header p {
     background: #f8f9fa;
 }
 
-/* Formulario */
 .form-dispositivo {
     max-width: 500px;
     margin: 0 auto;
@@ -307,6 +310,71 @@ header p {
 .btn-back:hover {
     background: #764ba2;
     transform: translateY(-2px);
+}
+
+/* ===== NUEVOS ESTILOS PARA LA SECCIÓN DE TIENDA ===== */
+
+.tienda-selection {
+    background: #f0f0f0;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+.tienda-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.tienda-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.tienda-option input[type="radio"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.tienda-option label {
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+}
+
+.tienda-subgroup {
+    margin-left: 30px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.tienda-subgroup input[type="text"],
+.tienda-subgroup select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+.tienda-subgroup input[type="text"]:focus,
+.tienda-subgroup select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.tienda-subgroup .hint {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 8px;
+    font-style: italic;
 }
 
 @media (max-width: 768px) {

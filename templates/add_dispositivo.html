@@ -13,7 +13,7 @@
         </header>
 
         <div class="content">
-            <form method="POST" action="/add_dispositivo" class="form-dispositivo">
+            <form method="POST" action="/add_dispositivo" class="form-dispositivo" id="form-dispositivo">
                 <div class="form-group">
                     <label for="nombre">Nombre del Dispositivo:</label>
                     <input type="text" id="nombre" name="nombre" required placeholder="Ej: AP-Entrada-01">
@@ -34,19 +34,32 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="tienda">Tienda:</label>
-                    <select id="tienda" name="tienda" required>
-                        <option value="">Selecciona una tienda</option>
-                        {% for t in todas_tiendas %}
-                            <option value="{{ t }}">{{ t }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                <div class="form-group tienda-selection">
+                    <p class="tienda-label">Selecciona cómo asignar la tienda:</p>
+                    
+                    <div class="tienda-option">
+                        <input type="radio" id="usar-existente" name="tipo-tienda" value="existente" checked onchange="actualizarTienda()">
+                        <label for="usar-existente">Usar tienda existente</label>
+                    </div>
 
-                <div class="form-group">
-                    <label for="nueva_tienda">O crea una nueva tienda:</label>
-                    <input type="text" id="nueva_tienda" name="nueva_tienda" placeholder="(Opcional) Ej: STO999">
+                    <div id="tienda-existente-group" class="tienda-subgroup">
+                        <select id="tienda" name="tienda">
+                            <option value="">Selecciona una tienda</option>
+                            {% for t in todas_tiendas %}
+                                <option value="{{ t }}">{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="tienda-option">
+                        <input type="radio" id="crear-nueva" name="tipo-tienda" value="nueva" onchange="actualizarTienda()">
+                        <label for="crear-nueva">Crear nueva tienda</label>
+                    </div>
+
+                    <div id="tienda-nueva-group" class="tienda-subgroup" style="display: none;">
+                        <input type="text" id="nueva_tienda" name="nueva_tienda" placeholder="Ej: STO304" maxlength="20">
+                        <p class="hint">💡 Código de la tienda (máx. 20 caracteres)</p>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -56,5 +69,54 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function actualizarTienda() {
+            const tipoTienda = document.querySelector('input[name="tipo-tienda"]:checked').value;
+            const tiendaExistenteGroup = document.getElementById('tienda-existente-group');
+            const tiendaNuevaGroup = document.getElementById('tienda-nueva-group');
+            const selectTienda = document.getElementById('tienda');
+            const inputNuevaTienda = document.getElementById('nueva_tienda');
+
+            if (tipoTienda === 'existente') {
+                tiendaExistenteGroup.style.display = 'block';
+                tiendaNuevaGroup.style.display = 'none';
+                selectTienda.required = true;
+                inputNuevaTienda.required = false;
+                inputNuevaTienda.value = '';
+            } else {
+                tiendaExistenteGroup.style.display = 'none';
+                tiendaNuevaGroup.style.display = 'block';
+                selectTienda.required = false;
+                selectTienda.value = '';
+                inputNuevaTienda.required = true;
+                inputNuevaTienda.focus();
+            }
+        }
+
+        // Validación adicional antes de enviar
+        document.getElementById('form-dispositivo').addEventListener('submit', function(e) {
+            const tipoTienda = document.querySelector('input[name="tipo-tienda"]:checked').value;
+            const selectTienda = document.getElementById('tienda');
+            const inputNuevaTienda = document.getElementById('nueva_tienda');
+
+            if (tipoTienda === 'existente' && !selectTienda.value) {
+                e.preventDefault();
+                alert('Por favor, selecciona una tienda existente');
+                return false;
+            }
+
+            if (tipoTienda === 'nueva' && !inputNuevaTienda.value.trim()) {
+                e.preventDefault();
+                alert('Por favor, ingresa el código de la nueva tienda');
+                return false;
+            }
+
+            // Si es nueva tienda, limpiar el campo de tienda existente
+            if (tipoTienda === 'nueva') {
+                selectTienda.value = '';
+            }
+        });
+    </script>
 </body>
 </html>

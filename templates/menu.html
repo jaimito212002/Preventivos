@@ -23,27 +23,30 @@
         </nav>
 
         <div class="content">
-            {% if tipos %}
-                <div class="tipos-grid">
-                    {% for tipo in tipos %}
-                        <div class="tipo-card">
-                            <h2>{{ tipo }}</h2>
-                            <form method="POST" action="/ping_tipo" class="ping-form">
-                                <input type="hidden" name="tipo" value="{{ tipo }}">
-                                <input type="hidden" name="tienda" value="{{ tienda_actual }}">
-                                <button type="submit" class="btn-ping">🔔 PING</button>
-                            </form>
-                            <div class="device-count">
-                                <p>{{ dispositivos|length if dispositivos else 0 }} dispositivos</p>
-                            </div>
+            <div class="tipos-grid">
+                {% for tipo in tipos %}
+                    <div class="tipo-card">
+                        <h2>{{ tipo }}</h2>
+                        <form method="POST" action="/ping_tipo" class="ping-form">
+                            <input type="hidden" name="tipo" value="{{ tipo }}">
+                            <input type="hidden" name="tienda" value="{{ tienda_actual }}">
+                            <button type="submit" class="btn-ping">🔔 PING</button>
+                        </form>
+                        <div class="device-count">
+                            <p>
+                                {% set count = conteo_por_tipo.get(tipo, 0) %}
+                                {% if count == 0 %}
+                                    <span class="sin-dispositivos">Sin dispositivos</span>
+                                {% elif count == 1 %}
+                                    {{ count }} dispositivo
+                                {% else %}
+                                    {{ count }} dispositivos
+                                {% endif %}
+                            </p>
                         </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <p>No hay dispositivos registrados en esta tienda</p>
-                </div>
-            {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
 
             <div class="admin-section">
                 <a href="/add_dispositivo" class="btn-add">➕ Agregar Dispositivo</a>

@@ -20,26 +20,39 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Variable temporal para guardar resultados del último ping
 ultimo_ping_resultado = {}
 
+# Lista ESTÁTICA de tipos/categorías disponibles
+TIPOS_DISPONIBLES = [
+    'APs',
+    'Switches',
+    'Servidores',
+    'Servidores Suecia',
+    'Impresoras',
+    'Cajas',
+    'Pinpads/Datáfonos'
+]
+
+# Lista de tiendas disponibles
+TIENDAS_DISPONIBLES = ['STO277', 'STO283']
+
 # --- PÁGINA PRINCIPAL: MENÚ POR TIENDA ---
 @app.get("/")
 def menu(request: Request, tienda: str = Query("STO277")):
     db = Session()
     try:
         # Filtramos dispositivos según la tienda seleccionada
-        dispositivos = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
+        dispositivos_tienda = db.query(Dispositivo).filter(Dispositivo.tienda == tienda).all()
         
-        # Sacamos los tipos disponibles en esa tienda
-        tipos = list(set([d.tipo for d in dispositivos])) if dispositivos else []
-        
-        # Lista de tiendas disponibles (puede ser dinámica luego)
-        todas_tiendas = ['STO277', 'STO283']
+        # Crear un diccionario con el conteo de dispositivos por tipo
+        conteo_por_tipo = {}
+        for tipo in TIPOS_DISPONIBLES:
+            conteo_por_tipo[tipo] = len([d for d in dispositivos_tienda if d.tipo == tipo])
         
         return templates.TemplateResponse("menu.html", {
             "request": request,
             "tienda_actual": tienda,
-            "todas_tiendas": todas_tiendas,
-            "tipos": tipos,
-            "dispositivos": dispositivos
+            "todas_tiendas": TIENDAS_DISPONIBLES,
+            "tipos": TIPOS_DISPONIBLES,
+            "conteo_por_tipo": conteo_por_tipo
         })
     finally:
         db.close()
@@ -103,12 +116,10 @@ def ping_tipo(
 # --- FORMULARIO PARA AÑADIR DISPOSITIVO ---
 @app.get("/add_dispositivo")
 def add_dispositivo_form(request: Request):
-    tipos = ['APs', 'Switches', 'Servidores', 'Servidores Suecia', 'Impresoras', 'Cajas', 'Pinpads/Datáfonos']
-    todas_tiendas = ['STO277', 'STO283']
     return templates.TemplateResponse("add_dispositivo.html", {
         "request": request,
-        "tipos": tipos,
-        "todas_tiendas": todas_tiendas
+        "tipos": TIPOS_DISPONIBLES,
+        "todas_tiendas": TIENDAS_DISPONIBLES
     })
 
 # --- RUTA POST PARA GUARDAR DISPOSITIVO ---
